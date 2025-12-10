@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TemplateJwtProject.Data;
 
@@ -11,9 +12,11 @@ using TemplateJwtProject.Data;
 namespace TemplateJwtProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251205103631_add-top2000-datatables")]
+    partial class addtop2000datatables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -287,7 +290,7 @@ namespace TemplateJwtProject.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("TemplateJwtProject.Models.Songs", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Song", b =>
                 {
                     b.Property<int>("SongId")
                         .ValueGeneratedOnAdd()
@@ -318,7 +321,7 @@ namespace TemplateJwtProject.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("Songs");
+                    b.ToTable("Song");
                 });
 
             modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entry", b =>
@@ -399,7 +402,7 @@ namespace TemplateJwtProject.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TemplateJwtProject.Models.Songs", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Song", b =>
                 {
                     b.HasOne("TemplateJwtProject.Models.Artist", "Artist")
                         .WithMany("Songs")
@@ -412,7 +415,7 @@ namespace TemplateJwtProject.Migrations
 
             modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entry", b =>
                 {
-                    b.HasOne("TemplateJwtProject.Models.Songs", "Song")
+                    b.HasOne("TemplateJwtProject.Models.Song", "Song")
                         .WithMany("Top2000Entries")
                         .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -426,7 +429,7 @@ namespace TemplateJwtProject.Migrations
                     b.Navigation("Songs");
                 });
 
-            modelBuilder.Entity("TemplateJwtProject.Models.Songs", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Song", b =>
                 {
                     b.Navigation("Top2000Entries");
                 });
