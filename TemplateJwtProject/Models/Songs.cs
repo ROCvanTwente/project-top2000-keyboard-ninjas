@@ -18,6 +18,6 @@ namespace TemplateJwtProject.Models
 
 		// Navigatie-eigenschappen
 		public Artist Artist { get; set; } = null!;
-		public ICollection<Top2000Entry> Top2000Entries { get; set; } = new List<Top2000Entry>();
+		public ICollection<Top2000Entries> Top2000Entries { get; set; } = new List<Top2000Entries>();
 	}
 }

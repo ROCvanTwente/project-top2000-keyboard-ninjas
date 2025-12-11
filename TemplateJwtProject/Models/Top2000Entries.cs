@@ -1,6 +1,6 @@
 ﻿namespace TemplateJwtProject.Models
 {
-	public class Top2000Entry
+	public class Top2000Entries
 	{
 		// Composite key: SongId + Year
 		public int SongId { get; set; }

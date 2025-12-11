@@ -28,7 +28,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(rt => rt.Token)
             .IsUnique();
 
-		builder.Entity<Top2000Entry>()
+		builder.Entity<Top2000Entries>()
 	        .HasKey(e => new { e.SongId, e.Year });
 	}
 }
