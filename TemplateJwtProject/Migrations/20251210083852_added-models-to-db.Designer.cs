@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TemplateJwtProject.Data;
 
@@ -11,9 +12,11 @@ using TemplateJwtProject.Data;
 namespace TemplateJwtProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251210083852_added-models-to-db")]
+    partial class addedmodelstodb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -321,7 +324,7 @@ namespace TemplateJwtProject.Migrations
                     b.ToTable("Songs");
                 });
 
-            modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entries", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entry", b =>
                 {
                     b.Property<int>("SongId")
                         .HasColumnType("int");
@@ -334,7 +337,7 @@ namespace TemplateJwtProject.Migrations
 
                     b.HasKey("SongId", "Year");
 
-                    b.ToTable("Top2000Entries");
+                    b.ToTable("Top2000Entry");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -410,7 +413,7 @@ namespace TemplateJwtProject.Migrations
                     b.Navigation("Artist");
                 });
 
-            modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entries", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entry", b =>
                 {
                     b.HasOne("TemplateJwtProject.Models.Songs", "Song")
                         .WithMany("Top2000Entries")
