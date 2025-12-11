@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TemplateJwtProject.Models
 {
+	[Table("Songs")]
 	public class Songs
 	{
 		[Key]
