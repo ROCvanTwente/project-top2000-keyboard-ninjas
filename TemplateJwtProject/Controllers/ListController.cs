@@ -36,6 +36,7 @@ namespace TemplateJwtProject.Controllers
 					Position = e.currentYear.Position,
 					PositionLastYear = e.previousYear != null ? e.previousYear.Position : (int?)null,
 					Titel = e.currentYear.Song.Titel,
+					ImgUrl = e.currentYear.Song.ImgUrl,
 					ReleaseYear = e.currentYear.Song.ReleaseYear,
 					Artist = e.currentYear.Song.Artist.Name
 				})
