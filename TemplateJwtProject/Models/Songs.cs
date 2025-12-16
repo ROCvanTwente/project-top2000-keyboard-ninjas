@@ -15,6 +15,7 @@ namespace TemplateJwtProject.Models
 		public string? ImgUrl { get; set; }
 		public string? Lyrics { get; set; }
 		public string? Youtube { get; set; }
+		public string? SpotifyId { get; set; }
 
 		// Navigatie-eigenschappen
 		public Artist Artist { get; set; } = null!;
