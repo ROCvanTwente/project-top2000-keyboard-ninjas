@@ -71,6 +71,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 // Services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
@@ -84,6 +85,9 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// CORS middleware (voor Authentication en Authorization!)
+app.UseCors("DefaultCorsPolicy");
 
 // Initialiseer rollen
 using (var scope = app.Services.CreateScope())
@@ -99,9 +103,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// CORS middleware (voor Authentication en Authorization!)
-app.UseCors("DefaultCorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
