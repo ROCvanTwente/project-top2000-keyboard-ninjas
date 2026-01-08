@@ -24,7 +24,7 @@ public class ArtistsController : ControllerBase
 	{
 		try
 		{
-			var artists = await _context.Artists
+			var artists = await _context.Artist
 				.Include(a => a.Songs)
 				.ToListAsync();
 
@@ -43,7 +43,7 @@ public class ArtistsController : ControllerBase
 	{
 		try
 		{
-			var artist = await _context.Artists
+			var artist = await _context.Artist
 				.Include(a => a.Songs)
 					.ThenInclude(s => s.Top2000Entries)
 				.FirstOrDefaultAsync(a => a.ArtistId == id);
@@ -98,7 +98,7 @@ public class ArtistsController : ControllerBase
 				return BadRequest(new { message = "Search term cannot be empty" });
 			}
 
-			var artists = await _context.Artists
+			var artists = await _context.Artist
 				.Where(a => a.Name.Contains(name))
 				.Include(a => a.Songs)
 				.ToListAsync();
