@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 using TemplateJwtProject.Models;
 
 namespace TemplateJwtProject.Data;
@@ -19,7 +18,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
+        // Tabelnamen configureren
+        builder.Entity<Artist>().ToTable("Artist");
+        builder.Entity<Songs>().ToTable("Songs");
+        builder.Entity<Top2000Entries>().ToTable("Top2000Entries");
+
         // RefreshToken configuratie
         builder.Entity<RefreshToken>()
             .HasOne(rt => rt.User)
@@ -31,7 +35,22 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(rt => rt.Token)
             .IsUnique();
 
-		builder.Entity<Top2000Entries>()
-	        .HasKey(e => new { e.SongId, e.Year });
-	}
+        // Top2000Entries composite key configuratie
+        builder.Entity<Top2000Entries>()
+            .HasKey(e => new { e.SongId, e.Year });
+
+        // Songs configuratie
+        builder.Entity<Songs>()
+            .HasOne(s => s.Artist)
+            .WithMany(a => a.Songs)
+            .HasForeignKey(s => s.ArtistId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Top2000Entries relatie met Songs
+        builder.Entity<Top2000Entries>()
+            .HasOne(t => t.Song)
+            .WithMany(s => s.Top2000Entries)
+            .HasForeignKey(t => t.SongId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }
