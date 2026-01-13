@@ -123,7 +123,17 @@ public class ArtistsController : ControllerBase
                 {
                     ArtistId = a.ArtistId,
                     Name = a.Name,
-                    TotalSongs = a.Songs.Count()
+                    TotalSongs = a.Songs.Count(),
+                    HighestPosition = a.Songs
+                        .SelectMany(s => s.Top2000Entries)
+                        .OrderBy(t => t.Position)
+                        .Select(t => (int?)t.Position)
+                        .FirstOrDefault(),
+                    BestSongTitle = a.Songs
+                        .SelectMany(s => s.Top2000Entries.Select(t => new { Song = s, Entry = t }))
+                        .OrderBy(x => x.Entry.Position)
+                        .Select(x => x.Song.Titel)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
@@ -143,4 +153,6 @@ public class ArtistDto
     public int ArtistId { get; set; }
     public string Name { get; set; } = null!;
     public int TotalSongs { get; set; }
+    public int? HighestPosition { get; set; }
+    public string? BestSongTitle { get; set; }
 }
