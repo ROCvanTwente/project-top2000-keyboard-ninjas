@@ -16,10 +16,31 @@ namespace TemplateJwtProject.Controllers
 		}
 
 		[HttpGet("{year}")]
-		public async Task<ActionResult> GetListByYear(int year)
+		public async Task<ActionResult> GetListByYear(
+			int year,
+			[FromQuery] int? decade = null,
+			[FromQuery] string? search = null)
 		{
-			var entries = await _context.Top2000Entries
-				.Where(e => e.Year == year)
+			var query = _context.Top2000Entries
+				.Where(e => e.Year == year);
+
+			// Apply decenium filter if provided
+			if (decade.HasValue)
+			{
+				int decadeStart = decade.Value;
+				int decadeEnd = decade.Value + 9;
+				query = query.Where(e => e.Song.ReleaseYear >= decadeStart && e.Song.ReleaseYear <= decadeEnd);
+			}
+
+			// Apply search filter for both artist and song if provided
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				query = query.Where(e => 
+					EF.Functions.Like(e.Song.Artist.Name, $"%{search}%") ||
+					EF.Functions.Like(e.Song.Titel, $"%{search}%"));
+			}
+
+			var entries = await query
 				.GroupJoin(
 					_context.Top2000Entries.Where(e => e.Year == year - 1),
 					currentYear => currentYear.SongId,
