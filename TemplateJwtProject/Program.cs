@@ -108,5 +108,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/api", () => Results.Json(new { status = "ok", message = "API running" }));
 
 app.Run();
