@@ -5,7 +5,11 @@ namespace TemplateJwtProject.Models
     {
         public int ArtistId { get; set; }
         public string Name { get; set; } = null!;
+        public string? Photo { get; set; }
+        public string? Wiki { get; set; }
+        public string? Biography { get; set; }
         public int TotalSongs { get; set; }
-        // Voeg andere velden toe indien nodig
+        public int? HighestPosition { get; set; }
+        public string? BestSongTitle { get; set; }
     }
 }

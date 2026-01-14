@@ -123,6 +123,9 @@ public class ArtistsController : ControllerBase
                 {
                     ArtistId = a.ArtistId,
                     Name = a.Name,
+                    Photo = a.Photo,
+                    Wiki = a.Wiki,
+                    Biography = a.Biography,
                     TotalSongs = a.Songs.Count(),
                     HighestPosition = a.Songs
                         .SelectMany(s => s.Top2000Entries)
@@ -145,14 +148,4 @@ public class ArtistsController : ControllerBase
             return StatusCode(500, new { message = "Error retrieving artist summaries", error = ex.Message });
         }
     }
-}
-
-// DTO for artist summary
-public class ArtistDto
-{
-    public int ArtistId { get; set; }
-    public string Name { get; set; } = null!;
-    public int TotalSongs { get; set; }
-    public int? HighestPosition { get; set; }
-    public string? BestSongTitle { get; set; }
 }
