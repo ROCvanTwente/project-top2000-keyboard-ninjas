@@ -18,6 +18,7 @@ namespace TemplateJwtProject.Controllers
 		[HttpGet("{year}")]
 		public async Task<ActionResult> GetListByYear(
 			int year,
+			[FromQuery] int? top = null,
 			[FromQuery] int? decade = null,
 			[FromQuery] string? search = null)
 		{
@@ -50,6 +51,7 @@ namespace TemplateJwtProject.Controllers
 					x => x.previousYear.DefaultIfEmpty(),
 					(x, previousYear) => new { x.currentYear, previousYear })
 				.OrderBy(e => e.currentYear.Position)
+				.Take(top ?? int.MaxValue)
 				.Select(e => new
 				{
 					e.currentYear.SongId,
