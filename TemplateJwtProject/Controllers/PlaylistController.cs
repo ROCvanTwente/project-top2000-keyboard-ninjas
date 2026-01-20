@@ -36,6 +36,7 @@ namespace TemplateJwtProject.Controllers
 		[HttpPost("add")]
 		public async Task<ActionResult> AddSongToPlaylist([FromQuery] string userId, [FromQuery] int songId)
 		{
+			// TODO: Check if the song or user exists in the database before adding
 			var playlistEntry = new Models.Playlist
 			{
 				UserId = userId,
