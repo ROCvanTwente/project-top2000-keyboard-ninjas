@@ -12,8 +12,8 @@ using TemplateJwtProject.Data;
 namespace TemplateJwtProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260108083608_update_database_andre")]
-    partial class update_database_andre
+    [Migration("20260120123910_add-playlist-table")]
+    partial class addplaylisttable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -249,6 +249,21 @@ namespace TemplateJwtProject.Migrations
                     b.ToTable("Artist", (string)null);
                 });
 
+            modelBuilder.Entity("TemplateJwtProject.Models.Playlist", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "SongId");
+
+                    b.HasIndex("SongId");
+
+                    b.ToTable("Playlist");
+                });
+
             modelBuilder.Entity("TemplateJwtProject.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -392,6 +407,25 @@ namespace TemplateJwtProject.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TemplateJwtProject.Models.Playlist", b =>
+                {
+                    b.HasOne("TemplateJwtProject.Models.Songs", "Songs")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TemplateJwtProject.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Songs");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TemplateJwtProject.Models.RefreshToken", b =>

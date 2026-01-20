@@ -246,6 +246,21 @@ namespace TemplateJwtProject.Migrations
                     b.ToTable("Artist", (string)null);
                 });
 
+            modelBuilder.Entity("TemplateJwtProject.Models.Playlist", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "SongId");
+
+                    b.HasIndex("SongId");
+
+                    b.ToTable("Playlist");
+                });
+
             modelBuilder.Entity("TemplateJwtProject.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -389,6 +404,25 @@ namespace TemplateJwtProject.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TemplateJwtProject.Models.Playlist", b =>
+                {
+                    b.HasOne("TemplateJwtProject.Models.Songs", "Songs")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TemplateJwtProject.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Songs");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TemplateJwtProject.Models.RefreshToken", b =>
