@@ -24,6 +24,7 @@ namespace TemplateJwtProject.Controllers
 				{
 					p.SongId,
 					p.Songs.Titel,
+					p.Songs.Artist.ArtistId,
 					p.Songs.Artist.Name,
 					p.Songs.ReleaseYear,
 					p.Songs.ImgUrl,
@@ -77,6 +78,14 @@ namespace TemplateJwtProject.Controllers
 			_context.Playlist.Remove(playlistEntry);
 			await _context.SaveChangesAsync();
 			return Ok();
+		}
+
+		[HttpGet("check-song")]
+		public async Task<ActionResult> IsSongInPlaylist([FromQuery] string userId, [FromQuery] int songId)
+		{
+			var isInPlaylist = await _context.Playlist
+				.AnyAsync(p => p.UserId == userId && p.SongId == songId);
+			return Ok(new { IsInPlaylist = isInPlaylist });
 		}
 	}
 }
