@@ -36,7 +36,25 @@ namespace TemplateJwtProject.Controllers
 		[HttpPost("add")]
 		public async Task<ActionResult> AddSongToPlaylist([FromQuery] string userId, [FromQuery] int songId)
 		{
-			// TODO: Check if the song or user exists in the database before adding
+			var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+			if (!userExists)
+			{
+				return NotFound("User not found");
+			}
+
+			var songExists = await _context.Songs.AnyAsync(s => s.SongId == songId);
+			if (!songExists)
+			{
+				return NotFound("Song not found");
+			}
+
+			var alreadyInPlaylist = await _context.Playlist
+				.AnyAsync(p => p.UserId == userId && p.SongId == songId);
+			if (alreadyInPlaylist)
+			{
+				return BadRequest("Song is already in the playlist");
+			}
+
 			var playlistEntry = new Models.Playlist
 			{
 				UserId = userId,
