@@ -20,6 +20,7 @@ namespace TemplateJwtProject.Controllers
 		{
 			var playlist = await _context.Playlist
 				.Where(p => p.UserId == userId)
+				.OrderBy(p => p.DateAdded)
 				.Select(p => new
 				{
 					p.SongId,
