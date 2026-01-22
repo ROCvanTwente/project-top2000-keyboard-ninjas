@@ -623,4 +623,47 @@ public class StatisticsController : ControllerBase
 			return StatusCode(500, new { message = "Error retrieving evergreens", error = ex.Message });
 		}
 	}
+
+	// GET: api/statistics/disappeared/{year}
+	// Haal alle verdwenen nummers op (nummers die vorig jaar wel in de lijst stonden maar dit jaar niet meer)
+	[HttpGet("disappeared/{year}")]
+	public async Task<ActionResult<IEnumerable<OneDayFlyDto>>> GetDisappearedSongs(int year)
+	{
+		try
+		{
+			var previousYear = year - 1;
+
+			// Gebruik LEFT JOIN om nummers te vinden die vorig jaar wel maar dit jaar niet in de lijst staan
+			var disappearedSongs = await (
+				from prevYearEntry in _context.Top2000Entries
+				join currentYearEntry in _context.Top2000Entries
+					on prevYearEntry.SongId equals currentYearEntry.SongId into currGroup
+				from currEntry in currGroup.Where(c => c.Year == year).DefaultIfEmpty()
+				where prevYearEntry.Year == previousYear
+					&& currEntry == null  // Niet in huidig jaar
+				orderby prevYearEntry.Song.Titel
+				select new OneDayFlyDto
+				{
+					SongId = prevYearEntry.SongId,
+					Title = prevYearEntry.Song.Titel,
+					Artist = prevYearEntry.Song.Artist.Name,
+					Year = prevYearEntry.Year,  // Jaar waarin het verdween (vorig jaar)
+					Position = prevYearEntry.Position,  // Laatste positie
+					ReleaseYear = prevYearEntry.Song.ReleaseYear,
+				}
+			).ToListAsync();
+
+			if (!disappearedSongs.Any())
+			{
+				return Ok(new List<OneDayFlyDto>());  // Lege lijst als er geen verdwenen nummers zijn
+			}
+
+			return Ok(disappearedSongs);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving disappeared songs for year {Year}", year);
+			return StatusCode(500, new { message = "Error retrieving disappeared songs", error = ex.Message });
+		}
+	}
 }
