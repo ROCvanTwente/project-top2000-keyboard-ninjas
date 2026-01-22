@@ -71,7 +71,8 @@ public class AuthController : ControllerBase
         {
             Token = token,
             RefreshToken = refreshToken.Token,
-            Email = user.Email ?? string.Empty,
+            Id = user.Id ?? string.Empty,
+			Email = user.Email ?? string.Empty,
             Username = user.UserName ?? string.Empty,
             Roles = roles.ToList(),
             ExpiresAt = DateTime.UtcNow.AddMinutes(60)
@@ -107,7 +108,8 @@ public class AuthController : ControllerBase
         {
             Token = token,
             RefreshToken = refreshToken.Token,
-            Email = user.Email ?? string.Empty,
+            Id = user.Id ?? string.Empty,
+			Email = user.Email ?? string.Empty,
             Username = user.UserName ?? string.Empty,
 			Roles = roles.ToList(),
             ExpiresAt = DateTime.UtcNow.AddMinutes(60)
@@ -146,6 +148,7 @@ public class AuthController : ControllerBase
         {
             Token = newAccessToken,
             RefreshToken = newRefreshToken.Token,
+            Id = user.Id ?? string.Empty,
             Email = user.Email ?? string.Empty,
             Username = user.UserName ?? string.Empty,
 			Roles = roles.ToList(),

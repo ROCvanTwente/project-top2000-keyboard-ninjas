@@ -14,6 +14,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Songs> Songs { get; set; }
     public DbSet<Artist> Artist { get; set; }
     public DbSet<Top2000Entries> Top2000Entries { get; set; }
+    public DbSet<Playlist> Playlist { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -46,11 +47,24 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(s => s.ArtistId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Top2000Entries relatie met Songs
-        builder.Entity<Top2000Entries>()
-            .HasOne(t => t.Song)
-            .WithMany(s => s.Top2000Entries)
-            .HasForeignKey(t => t.SongId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-}
+                // Top2000Entries relatie met Songs
+                builder.Entity<Top2000Entries>()
+                    .HasOne(t => t.Song)
+                    .WithMany(s => s.Top2000Entries)
+                    .HasForeignKey(t => t.SongId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Playlist configuratie
+                builder.Entity<Playlist>()
+                    .HasOne(p => p.User)
+                    .WithMany()
+                    .HasForeignKey(p => p.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                builder.Entity<Playlist>()
+                    .HasOne(p => p.Songs)
+                    .WithMany()
+                    .HasForeignKey(p => p.SongId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            }
+        }
