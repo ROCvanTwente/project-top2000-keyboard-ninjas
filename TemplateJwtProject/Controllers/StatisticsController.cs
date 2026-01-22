@@ -623,4 +623,58 @@ public class StatisticsController : ControllerBase
 			return StatusCode(500, new { message = "Error retrieving evergreens", error = ex.Message });
 		}
 	}
+
+    // GET: api/statistics/consecutive-songs/{year}
+    // Haalt artiesten op die met twee nummers na elkaar in de lijst staan
+    [HttpGet("consecutive-songs/{year}")]
+    public async Task<ActionResult<IEnumerable<ConsecutiveSongsDto>>> GetConsecutiveSongs(int year)
+    {
+        try
+        {
+            var entries = await _context.Top2000Entries
+                .Where(e => e.Year == year)
+                .OrderBy(e => e.Position)
+                .Select(e => new 
+                {
+                    e.Position,
+                    e.Song.ArtistId,
+                    ArtistName = e.Song.Artist.Name,
+                    SongTitle = e.Song.Titel
+                })
+                .ToListAsync();
+
+            if (entries.Count < 2)
+            {
+                return Ok(new List<ConsecutiveSongsDto>());
+            }
+
+            var consecutiveSongs = new List<ConsecutiveSongsDto>();
+            for (int i = 0; i < entries.Count - 1; i++)
+            {
+                var currentEntry = entries[i];
+                var nextEntry = entries[i + 1];
+
+                if (currentEntry.ArtistId == nextEntry.ArtistId &&
+                    nextEntry.Position == currentEntry.Position + 1)
+                {
+                    consecutiveSongs.Add(new ConsecutiveSongsDto
+                    {
+                        Artist = currentEntry.ArtistName,
+                        Title1 = currentEntry.SongTitle,
+                        Position1 = currentEntry.Position,
+                        Title2 = nextEntry.SongTitle,
+                        Position2 = nextEntry.Position
+                    });
+                }
+            }
+
+            return Ok(consecutiveSongs);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving consecutive songs for year {Year}", year);
+            return StatusCode(500, new { message = "Error retrieving consecutive songs", error = ex.Message });
+        }
+    }
+
 }
