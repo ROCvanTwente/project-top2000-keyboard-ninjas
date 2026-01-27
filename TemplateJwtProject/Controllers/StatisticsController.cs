@@ -675,4 +675,100 @@ public class StatisticsController : ControllerBase
 
         return Ok(result);
     }
+	// GET: api/statistics/disappeared/{year}
+	// Haal alle verdwenen nummers op (nummers die vorig jaar wel in de lijst stonden maar dit jaar niet meer)
+	[HttpGet("disappeared/{year}")]
+	public async Task<ActionResult<IEnumerable<OneDayFlyDto>>> GetDisappearedSongs(int year)
+	{
+		try
+		{
+			var previousYear = year - 1;
+
+			// Gebruik LEFT JOIN om nummers te vinden die vorig jaar wel maar dit jaar niet in de lijst staan
+			var disappearedSongs = await (
+				from prevYearEntry in _context.Top2000Entries
+				join currentYearEntry in _context.Top2000Entries
+					on prevYearEntry.SongId equals currentYearEntry.SongId into currGroup
+				from currEntry in currGroup.Where(c => c.Year == year).DefaultIfEmpty()
+				where prevYearEntry.Year == previousYear
+					&& currEntry == null  // Niet in huidig jaar
+				orderby prevYearEntry.Song.Titel
+				select new OneDayFlyDto
+				{
+					SongId = prevYearEntry.SongId,
+					Title = prevYearEntry.Song.Titel,
+					Artist = prevYearEntry.Song.Artist.Name,
+					Year = prevYearEntry.Year,  // Jaar waarin het verdween (vorig jaar)
+					Position = prevYearEntry.Position,  // Laatste positie
+					ReleaseYear = prevYearEntry.Song.ReleaseYear,
+				}
+			).ToListAsync();
+
+			if (!disappearedSongs.Any())
+			{
+				return Ok(new List<OneDayFlyDto>());  // Lege lijst als er geen verdwenen nummers zijn
+			}
+
+			return Ok(disappearedSongs);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving disappeared songs for year {Year}", year);
+			return StatusCode(500, new { message = "Error retrieving disappeared songs", error = ex.Message });
+		}
+	}
+  
+    // GET: api/statistics/consecutive-songs/{year}
+    // Haalt artiesten op die met twee nummers na elkaar in de lijst staan
+    [HttpGet("consecutive-songs/{year}")]
+    public async Task<ActionResult<IEnumerable<ConsecutiveSongsDto>>> GetConsecutiveSongs(int year)
+    {
+        try
+        {
+            var entries = await _context.Top2000Entries
+                .Where(e => e.Year == year)
+                .OrderBy(e => e.Position)
+                .Select(e => new 
+                {
+                    e.Position,
+                    e.Song.ArtistId,
+                    ArtistName = e.Song.Artist.Name,
+                    SongTitle = e.Song.Titel
+                })
+                .ToListAsync();
+
+            if (entries.Count < 2)
+            {
+                return Ok(new List<ConsecutiveSongsDto>());
+            }
+
+            var consecutiveSongs = new List<ConsecutiveSongsDto>();
+            for (int i = 0; i < entries.Count - 1; i++)
+            {
+                var currentEntry = entries[i];
+                var nextEntry = entries[i + 1];
+
+                if (currentEntry.ArtistId == nextEntry.ArtistId &&
+                    nextEntry.Position == currentEntry.Position + 1)
+                {
+                    consecutiveSongs.Add(new ConsecutiveSongsDto
+                    {
+                        Artist = currentEntry.ArtistName,
+                        Title1 = currentEntry.SongTitle,
+                        Position1 = currentEntry.Position,
+                        Title2 = nextEntry.SongTitle,
+                        Position2 = nextEntry.Position
+                    });
+                }
+            }
+
+            return Ok(consecutiveSongs);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving consecutive songs for year {Year}", year);
+            return StatusCode(500, new { message = "Error retrieving consecutive songs", error = ex.Message });
+        }
+    }
+
 }
