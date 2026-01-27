@@ -624,6 +624,57 @@ public class StatisticsController : ControllerBase
 		}
 	}
 
+    [HttpGet("binnenkomers")]
+    public async Task<ActionResult<IEnumerable<EntryDto>>> GetBinnenkomers([FromQuery] int year)
+    {
+        var previousYear = year - 1;
+
+        // First-time entries (no appearance before the given year)
+        var firstTimeEntries = _context.Top2000Entries
+            .Where(e => e.Year == year)
+            .Where(e => !_context.Top2000Entries.Any(prev => prev.SongId == e.SongId && prev.Year < year));
+
+        // Re-entries: absent in previous year, but appeared before that
+        var reEntriesAfterGap = _context.Top2000Entries
+            .Where(e => e.Year == year)
+            .Where(e => !_context.Top2000Entries.Any(prev => prev.SongId == e.SongId && prev.Year == previousYear))
+            .Where(e => _context.Top2000Entries.Any(prev => prev.SongId == e.SongId && prev.Year < year));
+
+        var result = await firstTimeEntries
+            .Union(reEntriesAfterGap)
+            .OrderBy(e => e.Position)
+            .Select(e => new EntryDto
+            {
+                Position = e.Position,
+                Title = e.Song.Titel,
+                Artist = e.Song.Artist.Name
+            })
+            .ToListAsync();
+
+        return Ok(result);
+    }
+
+    [HttpGet("opnieuw-binnenkomers/{year}")]
+    public async Task<ActionResult<IEnumerable<EntryDto>>> GetOpnieuwBinnenkomers(int year)
+    {
+        var previousYear = year - 1;
+
+        // Explicit re-entries: not present in the previous year, but appeared before that
+        var result = await _context.Top2000Entries
+            .Where(e => e.Year == year)
+            .Where(e => !_context.Top2000Entries.Any(prev => prev.SongId == e.SongId && prev.Year == previousYear))
+            .Where(e => _context.Top2000Entries.Any(prev => prev.SongId == e.SongId && prev.Year < previousYear))
+            .OrderBy(e => e.Position)
+            .Select(e => new EntryDto
+            {
+                Position = e.Position,
+                Title = e.Song.Titel,
+                Artist = e.Song.Artist.Name
+            })
+            .ToListAsync();
+
+        return Ok(result);
+    }
 	// GET: api/statistics/disappeared/{year}
 	// Haal alle verdwenen nummers op (nummers die vorig jaar wel in de lijst stonden maar dit jaar niet meer)
 	[HttpGet("disappeared/{year}")]
