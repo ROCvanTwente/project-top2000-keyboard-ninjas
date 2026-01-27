@@ -624,8 +624,8 @@ public class StatisticsController : ControllerBase
 		}
 	}
 
-    [HttpGet("binnenkomers")]
-    public async Task<ActionResult<IEnumerable<EntryDto>>> GetBinnenkomers([FromQuery] int year)
+    [HttpGet("binnenkomers/{year}")]
+    public async Task<ActionResult<IEnumerable<EntryDto>>> GetBinnenkomers(int year)
     {
         var previousYear = year - 1;
 
