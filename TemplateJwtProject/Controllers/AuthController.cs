@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
 
         var user = new ApplicationUser
         {
-            UserName = model.Email,
+            UserName = model.Username,
             Email = model.Email
         };
 
@@ -71,7 +71,9 @@ public class AuthController : ControllerBase
         {
             Token = token,
             RefreshToken = refreshToken.Token,
-            Email = user.Email ?? string.Empty,
+            Id = user.Id ?? string.Empty,
+			Email = user.Email ?? string.Empty,
+            Username = user.UserName ?? string.Empty,
             Roles = roles.ToList(),
             ExpiresAt = DateTime.UtcNow.AddMinutes(60)
         });
@@ -86,14 +88,14 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "Ongeldig e-mailadres of wachtwoord" });
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
         
         if (!result.Succeeded)
         {
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "Ongeldig e-mailadres of wachtwoord" });
         }
 
         var token = await _jwtService.GenerateTokenAsync(user);
@@ -106,8 +108,10 @@ public class AuthController : ControllerBase
         {
             Token = token,
             RefreshToken = refreshToken.Token,
-            Email = user.Email ?? string.Empty,
-            Roles = roles.ToList(),
+            Id = user.Id ?? string.Empty,
+			Email = user.Email ?? string.Empty,
+            Username = user.UserName ?? string.Empty,
+			Roles = roles.ToList(),
             ExpiresAt = DateTime.UtcNow.AddMinutes(60)
         });
     }
@@ -144,8 +148,10 @@ public class AuthController : ControllerBase
         {
             Token = newAccessToken,
             RefreshToken = newRefreshToken.Token,
+            Id = user.Id ?? string.Empty,
             Email = user.Email ?? string.Empty,
-            Roles = roles.ToList(),
+            Username = user.UserName ?? string.Empty,
+			Roles = roles.ToList(),
             ExpiresAt = DateTime.UtcNow.AddMinutes(60)
         });
     }
@@ -179,6 +185,6 @@ public class AuthController : ControllerBase
 
         _logger.LogInformation("User {UserId} logged out from all devices", userId);
 
-        return Ok(new { message = "Logged out from all devices successfully" });
+        return Ok(new { message = "Successvol uitgelogd" });
     }
 }

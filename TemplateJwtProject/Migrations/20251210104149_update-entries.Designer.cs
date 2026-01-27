@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TemplateJwtProject.Data;
 
@@ -11,9 +12,11 @@ using TemplateJwtProject.Data;
 namespace TemplateJwtProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251210104149_update-entries")]
+    partial class updateentries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,25 +246,7 @@ namespace TemplateJwtProject.Migrations
 
                     b.HasKey("ArtistId");
 
-                    b.ToTable("Artist", (string)null);
-                });
-
-            modelBuilder.Entity("TemplateJwtProject.Models.Playlist", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("SongId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("UserId", "SongId");
-
-                    b.HasIndex("SongId");
-
-                    b.ToTable("Playlist");
+                    b.ToTable("Artist");
                 });
 
             modelBuilder.Entity("TemplateJwtProject.Models.RefreshToken", b =>
@@ -325,9 +310,6 @@ namespace TemplateJwtProject.Migrations
                     b.Property<int?>("ReleaseYear")
                         .HasColumnType("int");
 
-                    b.Property<string>("SpotifyId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Titel")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -339,7 +321,7 @@ namespace TemplateJwtProject.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("Songs", (string)null);
+                    b.ToTable("Songs");
                 });
 
             modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entries", b =>
@@ -355,7 +337,7 @@ namespace TemplateJwtProject.Migrations
 
                     b.HasKey("SongId", "Year");
 
-                    b.ToTable("Top2000Entries", (string)null);
+                    b.ToTable("Top2000Entries");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -407,25 +389,6 @@ namespace TemplateJwtProject.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("TemplateJwtProject.Models.Playlist", b =>
-                {
-                    b.HasOne("TemplateJwtProject.Models.Songs", "Songs")
-                        .WithMany()
-                        .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TemplateJwtProject.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Songs");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TemplateJwtProject.Models.RefreshToken", b =>
