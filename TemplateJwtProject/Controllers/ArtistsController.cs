@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TemplateJwtProject.Data;
 using TemplateJwtProject.Models;
+using TemplateJwtProject.Models.DTOs;
 
 namespace TemplateJwtProject.Controllers;
 
@@ -114,28 +115,20 @@ public class ArtistsController : ControllerBase
 
     // GET: api/artists/summary
     [HttpGet("summary")]
-    public async Task<ActionResult<IEnumerable<ArtistDto>>> GetArtistsSummary()
+    public async Task<ActionResult<IEnumerable<ArtistSummaryDto>>> GetArtistsSummary()
     {
         try
         {
             var artists = await _context.Artist
-                .Select(a => new ArtistDto
+                .Select(a => new ArtistSummaryDto
                 {
                     ArtistId = a.ArtistId,
-                    Name = a.Name,
-                    Photo = a.Photo,
-                    Wiki = a.Wiki,
-                    Biography = a.Biography,
+                    ArtistNaam = a.Name,
                     TotalSongs = a.Songs.Count(),
                     HighestPosition = a.Songs
                         .SelectMany(s => s.Top2000Entries)
                         .OrderBy(t => t.Position)
                         .Select(t => (int?)t.Position)
-                        .FirstOrDefault(),
-                    BestSongTitle = a.Songs
-                        .SelectMany(s => s.Top2000Entries.Select(t => new { Song = s, Entry = t }))
-                        .OrderBy(x => x.Entry.Position)
-                        .Select(x => x.Song.Titel)
                         .FirstOrDefault()
                 })
                 .ToListAsync();
