@@ -61,7 +61,8 @@ namespace TemplateJwtProject.Controllers
 					Titel = e.currentYear.Song.Titel,
 					ImgUrl = e.currentYear.Song.ImgUrl,
 					ReleaseYear = e.currentYear.Song.ReleaseYear,
-					Artist = e.currentYear.Song.Artist.Name
+					Artist = e.currentYear.Song.Artist.Name,
+					ArtistId = e.currentYear.Song.Artist.ArtistId
 				})
 				.ToListAsync();
 
