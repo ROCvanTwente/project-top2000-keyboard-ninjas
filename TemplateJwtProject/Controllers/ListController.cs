@@ -18,6 +18,7 @@ namespace TemplateJwtProject.Controllers
 		[HttpGet("{year}")]
 		public async Task<ActionResult> GetListByYear(
 			int year,
+			[FromQuery] string? userId = null,
 			[FromQuery] int? top = null,
 			[FromQuery] int? decade = null,
 			[FromQuery] string? search = null)
@@ -41,7 +42,7 @@ namespace TemplateJwtProject.Controllers
 					EF.Functions.Like(e.Song.Titel, $"%{search}%"));
 			}
 
-			var entries = await query
+			var baseQuery = query
 				.GroupJoin(
 					_context.Top2000Entries.Where(e => e.Year == year - 1),
 					currentYear => currentYear.SongId,
@@ -49,23 +50,58 @@ namespace TemplateJwtProject.Controllers
 					(currentYear, previousYear) => new { currentYear, previousYear })
 				.SelectMany(
 					x => x.previousYear.DefaultIfEmpty(),
-					(x, previousYear) => new { x.currentYear, previousYear })
-				.OrderBy(e => e.currentYear.Position)
-				.Take(top ?? int.MaxValue)
-				.Select(e => new
-				{
-					e.currentYear.SongId,
-					e.currentYear.Year,
-					Position = e.currentYear.Position,
-					PositionLastYear = e.previousYear != null ? e.previousYear.Position : (int?)null,
-					Titel = e.currentYear.Song.Titel,
-					ImgUrl = e.currentYear.Song.ImgUrl,
-					ReleaseYear = e.currentYear.Song.ReleaseYear,
-					Artist = e.currentYear.Song.Artist.Name
-				})
-				.ToListAsync();
+					(x, previousYear) => new { x.currentYear, previousYear });
 
-			return Ok(entries);
+			if (!string.IsNullOrEmpty(userId))
+			{
+				var entries = await baseQuery
+					.GroupJoin(
+						_context.Playlist.Where(p => p.UserId == userId),
+						x => x.currentYear.SongId,
+						playlist => playlist.SongId,
+						(x, playlist) => new { x.currentYear, x.previousYear, playlist })
+					.SelectMany(
+						x => x.playlist.DefaultIfEmpty(),
+						(x, playlist) => new { x.currentYear, x.previousYear, playlist })
+					.OrderBy(e => e.currentYear.Position)
+					.Take(top ?? int.MaxValue)
+					.Select(e => new
+					{
+						e.currentYear.SongId,
+						e.currentYear.Year,
+						Position = e.currentYear.Position,
+						PositionLastYear = e.previousYear != null ? e.previousYear.Position : (int?)null,
+						Titel = e.currentYear.Song.Titel,
+						ImgUrl = e.currentYear.Song.ImgUrl,
+						ReleaseYear = e.currentYear.Song.ReleaseYear,
+						Artist = e.currentYear.Song.Artist.Name,
+						IsInPlaylist = e.playlist != null
+					})
+					.ToListAsync();
+
+				return Ok(entries);
+			}
+			else
+			{
+				var entries = await baseQuery
+					.OrderBy(e => e.currentYear.Position)
+					.Take(top ?? int.MaxValue)
+					.Select(e => new
+					{
+						e.currentYear.SongId,
+						e.currentYear.Year,
+						Position = e.currentYear.Position,
+						PositionLastYear = e.previousYear != null ? e.previousYear.Position : (int?)null,
+						Titel = e.currentYear.Song.Titel,
+						ImgUrl = e.currentYear.Song.ImgUrl,
+						ReleaseYear = e.currentYear.Song.ReleaseYear,
+						Artist = e.currentYear.Song.Artist.Name,
+						IsInPlaylist = false
+					})
+					.ToListAsync();
+
+				return Ok(entries);
+			}
 		}
 	}
 }
