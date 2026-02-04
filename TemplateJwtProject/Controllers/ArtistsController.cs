@@ -142,4 +142,26 @@ public class ArtistsController : ControllerBase
             return StatusCode(500, new { message = "Error retrieving artist summaries", error = ex.Message });
         }
     }
+
+    [HttpPut]
+    public async Task<ActionResult> UpdateArtist([FromBody] Artist updatedArtist)
+    {
+        try
+        {
+            var existingArtist = await _context.Artist.FindAsync(updatedArtist.ArtistId);
+            if (existingArtist == null)
+            {
+                return NotFound(new { message = $"Artist with ID {updatedArtist.ArtistId} not found" });
+            }
+            existingArtist.Photo = updatedArtist.Photo;
+            existingArtist.Biography = updatedArtist.Biography;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Artist updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating artist {ArtistId}", updatedArtist.ArtistId);
+            return StatusCode(500, new { message = "Error updating artist", error = ex.Message });
+        }
+	}
 }
