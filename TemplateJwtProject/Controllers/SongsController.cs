@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TemplateJwtProject.Data;
 using TemplateJwtProject.Models;
+using TemplateJwtProject.Models.DTOs;
 
 namespace TemplateJwtProject.Controllers
 {
@@ -37,17 +38,21 @@ namespace TemplateJwtProject.Controllers
 			return Ok(songs);
 		}
 
-		[HttpPut]
-		public async Task<ActionResult> UpdateSong([FromBody] Songs updatedSong)
+		[HttpPut("{id}")]
+		public async Task<ActionResult> UpdateSong(int id, [FromBody] SongUpdateDto dto)
 		{
-			var existingSong = await _context.Songs.FindAsync(updatedSong.SongId);
+			var existingSong = await _context.Songs.FindAsync(id);
+
 			if (existingSong == null)
 			{
-				return NotFound(new { message = $"Song with ID {updatedSong.SongId} not found" });
+				return NotFound(new { message = $"Song with ID {id} not found" });
 			}
-			existingSong.ReleaseYear = updatedSong.ReleaseYear;
-			existingSong.ImgUrl = updatedSong.ImgUrl;
-			existingSong.Lyrics = updatedSong.Lyrics;
+
+			// Map only the allowed fields
+			existingSong.ReleaseYear = dto.ReleaseYear;
+			existingSong.ImgUrl = dto.ImgUrl;
+			existingSong.Lyrics = dto.Lyrics;
+
 			await _context.SaveChangesAsync();
 			return Ok(new { message = "Song updated successfully" });
 		}
