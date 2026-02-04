@@ -75,6 +75,7 @@ namespace TemplateJwtProject.Controllers
 						ImgUrl = e.currentYear.Song.ImgUrl,
 						ReleaseYear = e.currentYear.Song.ReleaseYear,
 						Artist = e.currentYear.Song.Artist.Name,
+						ArtistId = e.currentYear.Song.Artist.ArtistId,
 						IsInPlaylist = e.playlist != null
 					})
 					.ToListAsync();
@@ -96,6 +97,7 @@ namespace TemplateJwtProject.Controllers
 						ImgUrl = e.currentYear.Song.ImgUrl,
 						ReleaseYear = e.currentYear.Song.ReleaseYear,
 						Artist = e.currentYear.Song.Artist.Name,
+						ArtistId = e.currentYear.Song.Artist.ArtistId,
 						IsInPlaylist = false
 					})
 					.ToListAsync();

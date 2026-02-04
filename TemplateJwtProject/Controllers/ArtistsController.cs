@@ -123,6 +123,7 @@ public class ArtistsController : ControllerBase
                 .Select(a => new ArtistSummaryDto
                 {
                     ArtistId = a.ArtistId,
+                    PhotoUrl = a.Photo ?? string.Empty,
                     ArtistNaam = a.Name,
                     TotalSongs = a.Songs.Count(),
                     HighestPosition = a.Songs
