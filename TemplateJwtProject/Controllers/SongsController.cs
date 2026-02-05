@@ -18,11 +18,29 @@ namespace TemplateJwtProject.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ActionResult> GetAllSongs()
+		public async Task<ActionResult> GetAllSongs([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string? search = null)
 		{
-			var songs = await _context.Songs
-				.Include(s => s.Artist)
+			if (page < 1) page = 1;
+			if (pageSize < 1 || pageSize > 100) pageSize = 100;
+
+			var query = _context.Songs.Include(s => s.Artist).AsQueryable();
+
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				var searchLower = search.ToLower();
+				query = query.Where(s =>
+					s.Titel.ToLower().Contains(searchLower) ||
+					s.Artist.Name.ToLower().Contains(searchLower) ||
+					s.ReleaseYear.ToString().Contains(search));
+			}
+
+			var totalCount = await query.CountAsync();
+			var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			var songs = await query
 				.OrderBy(s => s.SongId)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
 				.Select(s => new
 				{
 					s.SongId,
@@ -30,12 +48,21 @@ namespace TemplateJwtProject.Controllers
 					s.ReleaseYear,
 					s.ImgUrl,
 					s.Lyrics,
-					s.Youtube,
 					Artist = s.Artist.Name
 				})
 				.ToListAsync();
 
-			return Ok(songs);
+			return Ok(new
+			{
+				data = songs,
+				pagination = new
+				{
+					currentPage = page,
+					pageSize,
+					totalCount,
+					totalPages
+				}
+			});
 		}
 
 		[HttpPut("{id}")]

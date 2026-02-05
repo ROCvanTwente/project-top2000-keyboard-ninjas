@@ -164,4 +164,54 @@ public class ArtistsController : ControllerBase
 			return StatusCode(500, new { message = "Error updating artist", error = ex.Message });
 		}
 	}
+
+	[HttpGet("artist-page")]
+	public async Task<ActionResult> GetArtistsForPage([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string? search = null)
+	{
+		try
+		{
+			if (page < 1) page = 1;
+			if (pageSize < 1 || pageSize > 100) pageSize = 50;
+
+			var query = _context.Artist.AsQueryable();
+
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				var searchLower = search.ToLower();
+				query = query.Where(a => a.Name.ToLower().Contains(searchLower));
+			}
+
+			var totalCount = await query.CountAsync();
+			var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			var artists = await query
+				.OrderBy(a => a.ArtistId)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.Select(a => new
+				{
+					a.ArtistId,
+					a.Name,
+					a.Photo
+				})
+				.ToListAsync();
+
+			return Ok(new
+			{
+				data = artists,
+				pagination = new
+				{
+					currentPage = page,
+					pageSize,
+					totalCount,
+					totalPages
+				}
+			});
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving artists for page {Page}", page);
+			return StatusCode(500, new { message = "Error retrieving artists", error = ex.Message });
+		}
+	}
 }
