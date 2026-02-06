@@ -1,0 +1,107 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TemplateJwtProject.Data;
+
+namespace TemplateJwtProject.Controllers
+{
+	[ApiController]
+	[Route("api/[controller]")]
+	public class ListController : ControllerBase
+	{
+		private readonly AppDbContext _context;
+
+		public ListController(AppDbContext context)
+		{
+			_context = context;
+		}
+
+		[HttpGet("{year}")]
+		public async Task<ActionResult> GetListByYear(
+			int year,
+			[FromQuery] string? userId = null,
+			[FromQuery] int? top = null,
+			[FromQuery] int? decade = null,
+			[FromQuery] string? search = null)
+		{
+			var query = _context.Top2000Entries
+				.Where(e => e.Year == year);
+
+			// Apply decenium filter if provided
+			if (decade.HasValue)
+			{
+				int decadeStart = decade.Value;
+				int decadeEnd = decade.Value + 9;
+				query = query.Where(e => e.Song.ReleaseYear >= decadeStart && e.Song.ReleaseYear <= decadeEnd);
+			}
+
+			// Apply search filter for both artist and song if provided
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				query = query.Where(e => 
+					EF.Functions.Like(e.Song.Artist.Name, $"%{search}%") ||
+					EF.Functions.Like(e.Song.Titel, $"%{search}%"));
+			}
+
+			var baseQuery = query
+				.GroupJoin(
+					_context.Top2000Entries.Where(e => e.Year == year - 1),
+					currentYear => currentYear.SongId,
+					previousYear => previousYear.SongId,
+					(currentYear, previousYear) => new { currentYear, previousYear })
+				.SelectMany(
+					x => x.previousYear.DefaultIfEmpty(),
+					(x, previousYear) => new { x.currentYear, previousYear });
+
+			if (!string.IsNullOrEmpty(userId))
+			{
+				var entries = await baseQuery
+					.GroupJoin(
+						_context.Playlist.Where(p => p.UserId == userId),
+						x => x.currentYear.SongId,
+						playlist => playlist.SongId,
+						(x, playlist) => new { x.currentYear, x.previousYear, playlist })
+					.SelectMany(
+						x => x.playlist.DefaultIfEmpty(),
+						(x, playlist) => new { x.currentYear, x.previousYear, playlist })
+					.OrderBy(e => e.currentYear.Position)
+					.Take(top ?? int.MaxValue)
+					.Select(e => new
+					{
+						e.currentYear.SongId,
+						e.currentYear.Year,
+						Position = e.currentYear.Position,
+						PositionLastYear = e.previousYear != null ? e.previousYear.Position : (int?)null,
+						Titel = e.currentYear.Song.Titel,
+						ImgUrl = e.currentYear.Song.ImgUrl,
+						ReleaseYear = e.currentYear.Song.ReleaseYear,
+						Artist = e.currentYear.Song.Artist.Name,
+						IsInPlaylist = e.playlist != null
+					})
+					.ToListAsync();
+
+				return Ok(entries);
+			}
+			else
+			{
+				var entries = await baseQuery
+					.OrderBy(e => e.currentYear.Position)
+					.Take(top ?? int.MaxValue)
+					.Select(e => new
+					{
+						e.currentYear.SongId,
+						e.currentYear.Year,
+						Position = e.currentYear.Position,
+						PositionLastYear = e.previousYear != null ? e.previousYear.Position : (int?)null,
+						Titel = e.currentYear.Song.Titel,
+						ImgUrl = e.currentYear.Song.ImgUrl,
+						ReleaseYear = e.currentYear.Song.ReleaseYear,
+						Artist = e.currentYear.Song.Artist.Name,
+						IsInPlaylist = false
+					})
+					.ToListAsync();
+
+				return Ok(entries);
+			}
+		}
+	}
+}
