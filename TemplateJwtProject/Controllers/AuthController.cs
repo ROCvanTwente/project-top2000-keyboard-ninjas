@@ -187,4 +187,27 @@ public class AuthController : ControllerBase
 
         return Ok(new { message = "Successvol uitgelogd" });
     }
+
+	[HttpGet("check-role")]
+	public async Task<IActionResult> CheckUserRole([FromQuery] string userId)
+	{
+		if (string.IsNullOrWhiteSpace(userId))
+		{
+			return BadRequest(new { message = "UserId is required" });
+		}
+
+		var user = await _userManager.FindByIdAsync(userId);
+		if (user == null)
+		{
+			return NotFound(new { message = "User not found" });
+		}
+
+		var roles = await _userManager.GetRolesAsync(user);
+
+		return Ok(new
+		{
+			userId = user.Id,
+			roles = roles
+		});
+	}
 }
