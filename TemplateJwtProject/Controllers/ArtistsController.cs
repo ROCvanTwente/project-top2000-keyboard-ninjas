@@ -192,7 +192,8 @@ public class ArtistsController : ControllerBase
 				{
 					a.ArtistId,
 					a.Name,
-					a.Photo
+					a.Photo,
+                    a.Biography
 				})
 				.ToListAsync();
 
